@@ -1,0 +1,31 @@
+name: upload test profile
+on:
+  push:
+permissions: read-all
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [windows-latest]
+        go-version: ['1.24']
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+    - name: Install Go
+      uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b
+      with:
+        go-version: ${{ matrix.go-version }}
+        cache: true
+    - name: Run tests with profiles
+      run: go test -cpuprofile cpu.out -memprofile mem.out ./experimental/gittuf
+    - name: Upload MEM profile
+      uses: actions/upload-artifact@v4
+      with:
+        name: mem_prof.out
+        path: mem.out
+    - name: Upload CPU profile
+      uses: actions/upload-artifact@v4
+      with:
+        name: cpu_prof.out
+        path: cpu.out
